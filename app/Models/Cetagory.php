@@ -17,7 +17,7 @@ class Cetagory extends Model
     use AsSource, Chartable, Filterable, HasFactory, Notifiable, UserAccess;
 
     protected $fillable = [
-        'main_id', 'name', 'slug', 'description', 'status'
+        'main_id', 'name', 'slug', 'description', 'status','day_chart_count'
     ];
 
     protected $allowedFilters = [

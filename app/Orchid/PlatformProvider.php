@@ -61,6 +61,7 @@ class PlatformProvider extends OrchidServiceProvider
 
 
             Menu::make(__('Categories'))
+                ->permission('platform.systems.category.manage')
                 ->route('platform.systems.categories'),
 
             Menu::make(__('Alerts'))
@@ -69,8 +70,14 @@ class PlatformProvider extends OrchidServiceProvider
             Menu::make(__('Subscriptions'))
                 ->route('platform.systems.subscriptions'),
 
+            Menu::make(__('Your Plans'))
+            ->route('platform.systems.plans'),
+
             Menu::make(__('Charts'))
                 ->route('platform.systems.charts'),
+
+            Menu::make(__('Request'))
+                ->route('platform.systems.request'),
 
             Menu::make(__('Users'))
                 ->route('platform.systems.users')
@@ -95,6 +102,27 @@ class PlatformProvider extends OrchidServiceProvider
             ItemPermission::group(__('System'))
                 ->addPermission('platform.systems.roles', __('Roles'))
                 ->addPermission('platform.systems.users', __('Users')),
+
+            ItemPermission::group(__('Category'))
+                ->addPermission('platform.systems.category.manage', __('Manage Category')),
+
+            ItemPermission::group(__('Alerts'))
+                ->addPermission('platform.alerts.create', __('Create'))
+                ->addPermission('platform.alerts.edit', __('Edit'))
+                ->addPermission('platform.alerts.view', __('View'))
+                ->addPermission('platform.alerts.delete', __('Delete')),
+
+            ItemPermission::group(__('Subscriptions'))
+                ->addPermission('platform.systems.subscriptions.manage', __('Manage Subscriptions')),
+
+            ItemPermission::group(__('Chart'))
+                ->addPermission('platform.chart.create', __('Create'))
+                ->addPermission('platform.chart.edit', __('Edit'))
+                ->addPermission('platform.chart.view', __('View'))
+                ->addPermission('platform.chart.delete', __('Delete'))
+                ->addPermission('platform.chart.history', __('History'))
+                ->addPermission('platform.chart.request', __('Request'))
+                ->addPermission('platform.chart.published', __('Published')),
         ];
     }
 }

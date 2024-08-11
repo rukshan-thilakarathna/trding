@@ -48,6 +48,7 @@ class AlertListScreen extends Screen
         return [
             ModalToggle::make('Create New Alert')
                 ->modal('Create Alert')
+                ->canSee(Auth()->User()->hasAnyAccess(['platform.alerts.create']))
                 ->method('StoreNewAlert',),
         ];
     }

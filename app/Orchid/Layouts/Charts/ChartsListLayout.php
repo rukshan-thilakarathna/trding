@@ -36,6 +36,9 @@ class ChartsListLayout extends Table
                 ->sort()
                 ->filter(),
 
+            TD::make('coin_name', __('Coin'))
+            ->sort(),
+
             TD::make('GetCoin.name', __('Coin'))
                 ->sort(),
 

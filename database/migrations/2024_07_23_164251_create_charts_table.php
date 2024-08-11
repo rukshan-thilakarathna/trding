@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('charts', function (Blueprint $table) {
             $table->id();
+            $table->string('coin_name');
             $table->integer('coin');
             $table->string('image');
             $table->text('description');
+            $table->integer('subscription');
             $table->integer('status')->default(0);
             $table->timestamps();
         });

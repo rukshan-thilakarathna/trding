@@ -31,7 +31,7 @@ class CategoryListScreen extends Screen
             $category = Cetagory::filters()->where('mainId', $category_id->id)->paginate(12);
 
         }else{
-            $category = Cetagory::filters()->paginate(12);
+            $category = Cetagory::filters()->where('mainId', 0)->paginate(12);
         }
 
         return [
@@ -47,6 +47,13 @@ class CategoryListScreen extends Screen
     public function name(): ?string
     {
         return $this->SubCategoryId != 0 ? 'SubCategory List Screen' : 'Category List Screen';
+    }
+
+    public function permission(): ?iterable
+    {
+        return [
+            'platform.systems.category.manage',
+        ];
     }
 
     /**

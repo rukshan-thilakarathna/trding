@@ -75,16 +75,19 @@ class AlertListLayout extends Table
                             ->method('EditAlert',[
                                 'id'=>$alert->id
                             ])
+                            ->canSee(Auth()->User()->hasAnyAccess(['platform.alerts.edit']))
                             ->modal('Edit Alert', [
                                 'alert' => $alert->id,
                             ]),
 
                         ModalToggle::make('View')
+                            ->canSee(Auth()->User()->hasAnyAccess(['platform.alerts.view']))
                             ->modal('View Alert', [
                                 'alert' => $alert->id,
                             ]),
 
                         Button::make(__('Delete'))
+                            ->canSee(Auth()->User()->hasAnyAccess(['platform.alerts.delete']))
                             ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))
                             ->method('remove', [
                                 'id' => $alert->id,

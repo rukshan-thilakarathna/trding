@@ -124,10 +124,10 @@ class SubscriptionsListScreen extends Screen
                     ->type('test')
                     ->title('Discount'),
 
-                Input::make('subscriptions.daily_charts')
-                    ->type('number')
-                    ->required()
-                    ->title('Daily Charts Count'),
+//                Input::make('subscriptions.daily_charts')
+//                    ->type('number')
+//                    ->required()
+//                    ->title('Daily Charts Count'),
 
                 TextArea::make('subscriptions.description')
                     ->rows(5)

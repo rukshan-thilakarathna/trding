@@ -19,6 +19,7 @@ class Charts extends Model
     protected $fillable = [
         'coin',
         'subscription',
+        'coin_name',
         'image',
         'description',
         'status',

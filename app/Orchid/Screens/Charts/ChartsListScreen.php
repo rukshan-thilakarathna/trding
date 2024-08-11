@@ -3,12 +3,19 @@
 namespace App\Orchid\Screens\Charts;
 
 use App\Models\Cetagory;
+use App\Models\ChartRequest;
 use App\Models\Charts;
+use App\Models\DailyUserChart;
 use App\Models\Subscriptions;
+use App\Models\UserHasPlans;
 use App\Orchid\Layouts\Category\CategoryListLayout;
 use App\Orchid\Layouts\Charts\ChartsListLayout;
+use App\Orchid\Layouts\Charts\ChartsUserListLayout;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Relation;
@@ -21,17 +28,155 @@ use Orchid\Support\Facades\Toast;
 
 class ChartsListScreen extends Screen
 {
+    public $chartCount = 0;
+    public $IsSendTodayRequest = 0;
+
+    public $history = false;
+
     /**
      * Fetch data to be displayed on the screen.
      *
      * @return array
      */
-    public function query(): iterable
+    public function query(Request $request): iterable
     {
-        $charts = Charts::with('GetCoin','GetSubscription')->filters()->paginate(12);
+
+        $path = $request->path();
+
+        // Split the path by '/' and get the last segment
+        $segments = explode('/', $path);
+        $endpoint = end($segments);
+
+
+        if ($endpoint == 'charts-hisrory') {
+            $this->history = true;
+        }
+
+        if (!$this->history){
+            $charts = Charts::with('GetCoin','GetSubscription')->whereDate('created_at', Carbon::today())->filters()->paginate(12);
+
+
+            $requestCharts = ChartRequest::where('user_id', auth()->id())
+                ->whereDate('created_at', Carbon::today())
+                ->select('request_charts') // select the field you need
+                ->get();
+
+            $chartIds = [];
+            if ($requestCharts->isNotEmpty()) {
+                foreach ($requestCharts as $requestChart) {
+                    $chartIds = array_merge($chartIds, explode(", ", $requestChart->request_charts));
+                }
+            }
+
+//dd($chartIds);
+            $counts = array_count_values($chartIds);
+            foreach ($chartIds as $chartId) {
+                $userCharts1 = Charts::with(['GetCoin', 'GetSubscription'])
+                    ->whereDate('created_at', Carbon::today())
+                    ->where('coin', $chartId) // Match the current chartId
+                    ->where('status', 1)
+                    ->limit(3)
+                    ->filters()
+                    ->get();
+
+
+
+//                dd($counts[$chartId]);
+
+                foreach ($userCharts1 as $userCharts0){
+                    $IsAddedDailyUserChart = DailyUserChart::where('user_id',auth()->id())->whereDate('created_at', Carbon::today())->where('coin',$userCharts0->coin)->count();
+
+                    if ($IsAddedDailyUserChart < $counts[$chartId]){
+                        $IsAddedDailyUserChart1 = DailyUserChart::where('user_id',auth()->id())->whereDate('created_at', Carbon::today())->where('id',$userCharts0->id)->count();
+
+                        if($IsAddedDailyUserChart1 == 0){
+                            $daily_user_charts = new DailyUserChart();
+                            $daily_user_charts->id = $userCharts0->id;
+                            $daily_user_charts->user_id = auth()->id();
+                            $daily_user_charts->coin = $userCharts0->coin;
+                            $daily_user_charts->coin_name = $userCharts0->coin_name;
+                            $daily_user_charts->subscription = $userCharts0->subscription;
+                            $daily_user_charts->image = $userCharts0->image;
+                            $daily_user_charts->description = $userCharts0->description;
+                            $daily_user_charts->status = $userCharts0->status;
+                            $daily_user_charts->created_at = $userCharts0->created_at;
+                            $daily_user_charts->updated_at = $userCharts0->updated_at;
+                            $daily_user_charts->save();
+                        }
+
+
+                    }
+                }
+
+
+
+            }
+
+
+            $userCharts = DailyUserChart::with(['GetCoin', 'GetSubscription'])
+                ->whereDate('created_at', Carbon::today())
+                ->where('user_id', auth()->id())
+                ->filters()
+                ->paginate(12);
+
+            if (count($userCharts) == count($requestCharts)) {
+                $requestCharts1 = ChartRequest::where('user_id', auth()->id())
+                    ->whereDate('created_at', Carbon::today())
+                    ->get();
+                if ($requestCharts1->isNotEmpty()){
+                    foreach ($requestCharts1 as $requestChart) {
+                        $requestChart->status = 1;
+                        $requestChart->save();
+                    }
+                }
+
+            }
+
+            $userPlans = UserHasPlans::where('user_id',Auth()->User()->id)->with('GetPlan','GetUser')->where('status',1)->first();
+            $requestedChartCount = ChartRequest::where('user_id',Auth()->User()->id)->whereDate('created_at', Carbon::today())->count();
+
+            dd($requestedChartCount);
+
+            if ($requestedChartCount < $userPlans->GetPlan->daily_charts) {
+                $this->chartCount = $userPlans->GetPlan->daily_charts-$requestedChartCount;
+            }
+
+
+        }else{
+
+            $charts = Charts::with('GetCoin','GetSubscription')->whereDate('created_at','!=', Carbon::today())->filters()->paginate(12);
+            $requestCharts = ChartRequest::where('user_id', auth()->id())
+                ->whereDate('created_at', Carbon::today())
+                ->select('request_charts') // select the field you need
+                ->get();
+
+            $chartIds = [];
+            if ($requestCharts->isNotEmpty()) {
+                foreach ($requestCharts as $requestChart) {
+                    $chartIds = array_merge($chartIds, explode(", ", $requestChart->request_charts));
+                }
+            }
+
+            $userCharts = Charts::with(['GetCoin', 'GetSubscription'])
+                ->whereDate('created_at','!=', Carbon::today())
+                ->whereIn('coin', $chartIds)
+                ->where('status', 1)
+                ->filters()
+                ->paginate(12);
+
+            $userPlans = UserHasPlans::where('user_id',Auth()->User()->id)->with('GetPlan','GetUser')->where('status',1)->get();
+            if ($userPlans->count() == 1) {
+                $this->chartCount = $userPlans[0]->GetPlan->daily_charts;
+            }
+        }
+
+
+
+
 
         return [
-            'charts' => $charts
+            'charts' => $charts,
+            'UserCharts' => $userCharts
         ];
     }
 
@@ -54,8 +199,23 @@ class ChartsListScreen extends Screen
     {
         return [
             ModalToggle::make('Create New Chart')
+                ->canSee( $this->history == false)
                 ->modal('Create Chars')
                 ->method('StoreNewChart',),
+
+            ModalToggle::make('Send Chart Request')
+                ->canSee($this->chartCount > 0  && $this->history == false)
+                ->modal('Send Chart Request window')
+                ->method('RequestChart',),
+
+            Link::make(__('Chart History'))
+                ->canSee( $this->history == false)
+                ->route('platform.systems.charts.history'),
+
+
+             Link::make(__('Back'))
+                 ->canSee( $this->history == true)
+                 ->route('platform.systems.charts')
         ];
     }
 
@@ -66,14 +226,43 @@ class ChartsListScreen extends Screen
      */
     public function layout(): iterable
     {
+        $chartCount =
+        $rows = [];
+        $table = ChartsListLayout::class;
+        $tableUser = ChartsUserListLayout::class;
+
+        for ($i = 0; $i < $this->chartCount; $i++) {
+            $rows[] = ModalToggle::make('Send Chart Request 0'.$i+1)
+                ->style('    text-decoration: none;width: 100%;background: #e1e1e1;')
+                ->modal('Send Chart Request')
+                ->method('RequestChart',);
+        }
+
         return [
-            ChartsListLayout::class,
+            $table,
+            $tableUser,
+
+            Layout::modal('Send Chart Request window', Layout::rows($rows))->withoutApplyButton(),
+
+            Layout::modal('Send Chart Request', Layout::rows([
+                Select::make("RequestChart")
+                    ->fromQuery(Cetagory::where('mainId', '!=', '0'), 'name', 'id')
+                    ->title('Chart'),
+            ]))->applyButton('Request'),
 
             Layout::modal('Create Chars',Layout::rows([
 
+                Select::make('chart.coin_name')
+                    ->options([
+                        'Coin'   => 'Coin',
+                        'Currency'   => 'Currency',
+                        'Stock'   => 'Stock',
+                    ])
+                    ->title('Name'),
+
                 Select::make('chart.coin')
                     ->fromQuery(Cetagory::where('mainId', '!=', '0'), 'name','id')
-                    ->title('Coin'),
+                    ->title('Coin/Currency/Stock'),
 
                 Select::make('chart.subscription')
                     ->fromQuery(Subscriptions::where('status', '!=', '0'), 'name','id')
@@ -91,9 +280,17 @@ class ChartsListScreen extends Screen
             ]))->applyButton('Create'),
 
             Layout::modal('Edit Charts',Layout::rows([
+                Select::make('chart.coin_name')
+                    ->options([
+                        'Coin'   => 'Coin',
+                        'Currency'   => 'Currency',
+                        'Stock'   => 'Stock',
+                    ])
+                    ->title('Name'),
+
                 Select::make('chart.coin')
                     ->fromQuery(Cetagory::where('mainId', '!=', '0'), 'name','id')
-                    ->title('Coin'),
+                    ->title('Coin/Currency/Stock'),
 
                 Select::make('chart.subscription')
                     ->fromQuery(Subscriptions::where('status', '!=', '0'), 'name','id')
@@ -149,6 +346,7 @@ class ChartsListScreen extends Screen
         // Create the new chart record
         $newCharts = new Charts();
         $newCharts->coin = $request->input('chart.coin');
+        $newCharts->coin_name = $request->input('chart.coin_name');
         $newCharts->subscription = $request->input('chart.subscription');
         $newCharts->image = $imagePath ?? '';
         $newCharts->description = $request->input('chart.description', '');
@@ -185,6 +383,7 @@ class ChartsListScreen extends Screen
 
         // Update the chart record
         $chart->coin = $request->input('chart.coin');
+        $chart->coin_name = $request->input('chart.coin_name');
         $chart->subscription = $request->input('chart.subscription');
         $chart->description = $request->input('chart.description', '');
         $chart->status = $chart->status; // Assuming status is not being updated here
@@ -260,6 +459,20 @@ class ChartsListScreen extends Screen
         }
     }
 
+    public function RequestChart(Request $request): void
+    {
 
+        $send = New ChartRequest();
+        $send->user_id = Auth()->User()->id;
+        $send->request_charts = $request->RequestChart;
+        $send->status = 0;
+        $send->save();
 
+        $day_chart_count = Cetagory::findOrFail($request->RequestChart);
+        $day_chart_count->day_chart_count = $day_chart_count->day_chart_count+1;
+        $day_chart_count->save();
+
+        Toast::info(__('successfully'));
+
+    }
 }

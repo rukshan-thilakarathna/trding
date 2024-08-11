@@ -18,9 +18,11 @@ use App\Orchid\Screens\PlatformScreen;
 use App\Orchid\Screens\Role\RoleEditScreen;
 use App\Orchid\Screens\Role\RoleListScreen;
 use App\Orchid\Screens\Subscriptions\SubscriptionsListScreen;
+use App\Orchid\Screens\User\RequestListScreen;
 use App\Orchid\Screens\User\UserEditScreen;
 use App\Orchid\Screens\User\UserListScreen;
 use App\Orchid\Screens\User\UserProfileScreen;
+use App\Orchid\Screens\YourPlans\YourPlansListScreen;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
@@ -115,12 +117,31 @@ Route::screen('subscriptions',SubscriptionsListScreen::class)
         ->parent('platform.index')
         ->push(__('Subscriptions'), route('platform.systems.subscriptions')));
 
+Route::screen('plans',YourPlansListScreen::class)
+    ->name('platform.systems.plans')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Your Plans'), route('platform.systems.plans')));
+
 
 Route::screen('charts',ChartsListScreen::class)
     ->name('platform.systems.charts')
     ->breadcrumbs(fn (Trail $trail) => $trail
         ->parent('platform.index')
         ->push(__('Charts'), route('platform.systems.charts')));
+
+
+Route::screen('charts-hisrory',ChartsListScreen::class)
+    ->name('platform.systems.charts.history')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Charts History'), route('platform.systems.charts.history')));
+
+Route::screen('request',RequestListScreen::class)
+    ->name('platform.systems.request')
+    ->breadcrumbs(fn (Trail $trail) => $trail
+        ->parent('platform.index')
+        ->push(__('Request'), route('platform.systems.request')));
 
 
 
