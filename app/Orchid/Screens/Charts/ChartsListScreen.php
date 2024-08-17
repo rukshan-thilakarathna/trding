@@ -51,7 +51,6 @@ class ChartsListScreen extends Screen
         if ($endpoint == 'charts-hisrory') {
             $this->history = true;
         }
-
         if (!$this->history){
             $charts = Charts::with('GetCoin','GetSubscription')->whereDate('created_at', Carbon::today())->filters()->paginate(12);
 
@@ -68,7 +67,7 @@ class ChartsListScreen extends Screen
                 }
             }
 
-//dd($chartIds);
+
             $counts = array_count_values($chartIds);
             foreach ($chartIds as $chartId) {
                 $userCharts1 = Charts::with(['GetCoin', 'GetSubscription'])
@@ -135,7 +134,6 @@ class ChartsListScreen extends Screen
             $userPlans = UserHasPlans::where('user_id',Auth()->User()->id)->with('GetPlan','GetUser')->where('status',1)->first();
             $requestedChartCount = ChartRequest::where('user_id',Auth()->User()->id)->whereDate('created_at', Carbon::today())->count();
 
-            dd($requestedChartCount);
 
             if ($requestedChartCount < $userPlans->GetPlan->daily_charts) {
                 $this->chartCount = $userPlans->GetPlan->daily_charts-$requestedChartCount;
