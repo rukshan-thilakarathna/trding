@@ -40,6 +40,13 @@ class SubscriptionsListScreen extends Screen
         return 'SubscriptionsListScreen';
     }
 
+    public function permission(): ?iterable
+    {
+        return [
+            'platform.systems.subscriptions.manage',
+        ];
+    }
+
     /**
      * The screen's action buttons.
      *

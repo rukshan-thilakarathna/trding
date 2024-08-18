@@ -27,6 +27,8 @@
     <meta name="turbo-prefetch" content="{{ var_export(config('platform.turbo.prefetch', true)) }}">
     <meta name="dashboard-prefix" content="{{  Dashboard::prefix() }}">
 
+
+
     @if(!config('platform.turbo.cache', false))
         <meta name="turbo-cache-control" content="no-cache">
     @endif
@@ -50,7 +52,7 @@
     @endif
 </head>
 
-<body class="{{ \Orchid\Support\Names::getPageNameClass() }}" data-controller="pull-to-refresh">
+<body class="{{ \Orchid\Support\Names::getPageNameClass() }} " data-controller="pull-to-refresh">
 
 <div class="container-fluid" data-controller="@yield('controller')" @yield('controller-data')>
 
@@ -67,7 +69,6 @@
 </div>
 
 @stack('scripts')
-
 
 </body>
 </html>

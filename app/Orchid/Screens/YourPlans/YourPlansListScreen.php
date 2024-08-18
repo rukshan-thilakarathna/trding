@@ -26,6 +26,7 @@ class YourPlansListScreen extends Screen
      */
     public function query(): iterable
     {
+
         $userPlans = UserHasPlans::where('user_id',Auth()->User()->id)->with('GetPlan','GetUser')->where('status',1)->get();
         // dd($userPlans);
 
@@ -45,7 +46,7 @@ class YourPlansListScreen extends Screen
      */
     public function name(): ?string
     {
-        return 'YourPlansListScreen';
+        return 'YourPlansListScreen ';
     }
 
     /**
@@ -74,7 +75,7 @@ class YourPlansListScreen extends Screen
             YourPlansListLayout::class,
             Layout::modal('Buy Subscription Plan',Layout::rows([
                 Select::make('yourplan.plan')
-                    ->fromQuery(Subscriptions::where('status', '=', '1'), 'name','id')
+                    ->fromQuery(Subscriptions::where('status', '=', '1')->where('price', '>', '0'), 'name','id')
                     ->title('Plan'),
 
             ]))->applyButton('Buy'),

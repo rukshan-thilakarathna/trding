@@ -155,10 +155,9 @@ class ChartsListScreen extends Screen
                 }
             }
 
-            $userCharts = Charts::with(['GetCoin', 'GetSubscription'])
-                ->whereDate('created_at','!=', Carbon::today())
-                ->whereIn('coin', $chartIds)
-                ->where('status', 1)
+            $userCharts = DailyUserChart::with(['GetCoin', 'GetSubscription'])
+                ->whereDate('created_at', '!=',Carbon::today())
+                ->where('user_id', auth()->id())
                 ->filters()
                 ->paginate(12);
 
@@ -195,9 +194,10 @@ class ChartsListScreen extends Screen
      */
     public function commandBar(): iterable
     {
+        $user = \App\Models\User::find((Auth::user())->id);
         return [
             ModalToggle::make('Create New Chart')
-                ->canSee( $this->history == false)
+                ->canSee( $this->history == false && $user->hasAnyAccess(['platform.chart.create']))
                 ->modal('Create Chars')
                 ->method('StoreNewChart',),
 
@@ -226,8 +226,13 @@ class ChartsListScreen extends Screen
     {
         $chartCount =
         $rows = [];
+
         $table = ChartsListLayout::class;
-        $tableUser = ChartsUserListLayout::class;
+        if(Auth::user()->presenter()->subTitle() == 'User'){
+            $table = ChartsUserListLayout::class;
+        }
+
+
 
         for ($i = 0; $i < $this->chartCount; $i++) {
             $rows[] = ModalToggle::make('Send Chart Request 0'.$i+1)
@@ -238,7 +243,6 @@ class ChartsListScreen extends Screen
 
         return [
             $table,
-            $tableUser,
 
             Layout::modal('Send Chart Request window', Layout::rows($rows))->withoutApplyButton(),
 
@@ -246,6 +250,9 @@ class ChartsListScreen extends Screen
                 Select::make("RequestChart")
                     ->fromQuery(Cetagory::where('mainId', '!=', '0'), 'name', 'id')
                     ->title('Chart'),
+                TextArea::make('text')
+                    ->rows(5)
+                    ->title('Description'),
             ]))->applyButton('Request'),
 
             Layout::modal('Create Chars',Layout::rows([
@@ -463,6 +470,7 @@ class ChartsListScreen extends Screen
         $send = New ChartRequest();
         $send->user_id = Auth()->User()->id;
         $send->request_charts = $request->RequestChart;
+        $send->text = $request->text;
         $send->status = 0;
         $send->save();
 

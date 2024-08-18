@@ -17,6 +17,7 @@ class ChartRequest extends Model
     protected $fillable = [
         'user_id',
         'request_charts',
+        'text',
         'status',
     ];
 

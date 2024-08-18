@@ -27,14 +27,14 @@
     !!}
 </div>
 
-<div class="row align-items-center">
-    <div class="col-md-6 col-xs-12">
+<div class="row align-items-center" style="flex-direction: column-reverse !important;display: flex;">
+    <div class="col-md-6 col-xs-12"  style="width:100%">
         <a href="{{ route('platform.login.lock') }}" class="small">
             {{__('Sign in with another user.')}}
         </a>
     </div>
-    <div class="col-md-6 col-xs-12">
-        <button id="button-login" type="submit" class="btn btn-default btn-block" tabindex="2">
+    <div class="col-md-6 col-xs-12" style="width:100%">
+        <button style="width:100%" id="button-login" type="submit" class="btn btn-md btn-grad btn-grad-alternet btn-round" tabindex="3">
             <x-orchid-icon path="bs.box-arrow-in-right" class="small me-2"/>
             {{__('Login')}}
         </button>

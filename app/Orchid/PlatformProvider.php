@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Orchid;
 
+use App\Models\UserHasPlans;
 use Orchid\Platform\Dashboard;
 use Orchid\Platform\ItemPermission;
 use Orchid\Platform\OrchidServiceProvider;
@@ -33,54 +34,58 @@ class PlatformProvider extends OrchidServiceProvider
      */
     public function menu(): array
     {
+            $userHasPlan = UserHasPlans::where('user_id' ,Auth()->User()->id)->count();
+
         return [
 
-            Menu::make('Get Started')
-                ->icon('bs.book')
-                ->title('Navigation')
-                ->route(config('platform.index')),
-
-            Menu::make('Sample Screen')
-                ->icon('bs.collection')
-                ->route('platform.example')
-                ->badge(fn () => 6),
-
-            Menu::make('Form Elements')
-                ->icon('bs.card-list')
-                ->route('platform.example.fields')
-                ->active('*/examples/form/*'),
-
-            Menu::make('Overview Layouts')
-                ->icon('bs.window-sidebar')
-                ->route('platform.example.layouts'),
-
-            Menu::make('Grid System')
-                ->icon('bs.columns-gap')
-                ->route('platform.example.grid'),
-
-
-
-            Menu::make(__('Categories'))
-                ->permission('platform.systems.category.manage')
-                ->route('platform.systems.categories'),
+//            Menu::make('Get Started')
+//                ->icon('bs.book')
+//                ->title('Navigation')
+//                ->route(config('platform.index')),
+//
+//            Menu::make('Sample Screen')
+//                ->icon('bs.collection')
+//                ->route('platform.example')
+//                ->badge(fn () => 6),
+//
+//            Menu::make('Form Elements')
+//                ->icon('bs.card-list')
+//                ->route('platform.example.fields')
+//                ->active('*/examples/form/*'),
+//
+//            Menu::make('Overview Layouts')
+//                ->icon('bs.window-sidebar')
+//                ->route('platform.example.layouts'),
+//
+//            Menu::make('Grid System')
+//                ->icon('bs.columns-gap')
+//                ->route('platform.example.grid'),
+//
+//            Menu::make(__('Categories'))
+//                ->permission('platform.systems.category.manage')
+//                ->route('platform.systems.categories'),
 
             Menu::make(__('Alerts'))
                 ->route('platform.systems.alerts'),
 
             Menu::make(__('Subscriptions'))
+                ->permission('platform.systems.subscriptions.manage')
                 ->route('platform.systems.subscriptions'),
 
             Menu::make(__('Your Plans'))
             ->route('platform.systems.plans'),
 
             Menu::make(__('Charts'))
+                ->canSee($userHasPlan > 0)
                 ->route('platform.systems.charts'),
 
             Menu::make(__('Request'))
+                ->permission('platform.systems.request.manage')
                 ->route('platform.systems.request'),
 
             Menu::make(__('Users'))
                 ->route('platform.systems.users')
+                ->permission('platform.systems.subscriptions.manage')
                 ->permission('platform.systems.users')
                 ->title(__('Access Controls')),
 
@@ -114,6 +119,9 @@ class PlatformProvider extends OrchidServiceProvider
 
             ItemPermission::group(__('Subscriptions'))
                 ->addPermission('platform.systems.subscriptions.manage', __('Manage Subscriptions')),
+
+            ItemPermission::group(__('Request'))
+                ->addPermission('platform.systems.request.manage', __('Manage Subscriptions')),
 
             ItemPermission::group(__('Chart'))
                 ->addPermission('platform.chart.create', __('Create'))

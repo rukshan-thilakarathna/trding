@@ -9,7 +9,7 @@
     <!-- Fav Icon  -->
     <link rel="shortcut icon" href="{{asset('web/images/favicon.png')}}">
     <!-- Site Title  -->
-    <title>DT Token</title>
+    <title>trading</title>
     <!-- Bundle and Base CSS -->
     <link rel="stylesheet" href="{{asset('web/assets/css/vendor.bundle.css?ver=210')}}">
     <link rel="stylesheet" href="{{asset('web/assets/css/style-dark.css?ver=210')}}">

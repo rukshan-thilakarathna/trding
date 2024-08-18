@@ -78,10 +78,10 @@ class ChartsUserListLayout extends Table
 //                                'charts' => $charts->id,
 //                            ]),
 //
-//                        ModalToggle::make('View')
-//                            ->modal('View Charts', [
-//                                'charts' => $charts->id,
-//                            ]),
+                        ModalToggle::make('View')
+                            ->modal('View Charts', [
+                                'charts' => $charts->id,
+                            ]),
 //
 //                        Button::make(__('Delete'))
 //                            ->confirm(__('Once the account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.'))

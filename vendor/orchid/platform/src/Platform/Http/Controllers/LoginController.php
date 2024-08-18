@@ -70,9 +70,7 @@ class LoginController extends Controller
         );
 
         if (! $auth) {
-            throw ValidationException::withMessages([
-                'email' => __('The details you entered did not match our records. Please double-check and try again.'),
-            ]);
+            return redirect()->back()->with('message', 'The details you entered did not match our records. Please double-check and try again.');
         }
 
         if ($request->boolean('remember')) {

@@ -48,6 +48,7 @@ class RequestListLayout extends Table
                     }
                     return implode(", ", $chartNames);
             }),
+            TD::make('text', __('description')),
 
             TD::make('status', 'Status')
                 ->render(function (ChartRequest $request) {

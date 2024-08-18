@@ -40,6 +40,13 @@ class RequestListScreen extends Screen
         return 'Request';
     }
 
+    public function permission(): ?iterable
+    {
+        return [
+            'platform.systems.request.manage',
+        ];
+    }
+
     /**
      * Display header description.
      */
